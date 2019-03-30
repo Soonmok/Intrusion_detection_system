@@ -11,4 +11,9 @@ def load_data(filenames):
     return datasets
 
 def process_data(datasets):
+    index_to_category = [1, 2, 3, 6, 11, 20, 21, 41]
+    datasets[index_to_category] = datasets[index_to_category].astype('category')
+    data = datasets.iloc[:, :41]
+    labels = datasets.iloc[:, 41]
+    return data, labels
     
