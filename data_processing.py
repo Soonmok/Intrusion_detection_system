@@ -21,29 +21,32 @@ def load_data(filenames):
                   'dst_host_same_src_port_rate', 'dst_host_srv_diff_host_rate',
                   'dst_host_serror_rate', 'dst_host_srv_serror_rate',
                   'dst_host_rerror_rate', 'dst_host_srv_rerror_rate',
-                  'target', 'dummy']
+                  'class', 'dummy']
         dataset = pd.read_csv(filename, sep=',', header=None, names=names)
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
     return datasets
 
-def process_data(datasets):
+def process_data(datasets, index_to_category, index_to_continuous):
     label_encoder = LabelEncoder()
-    index_to_category = ['protocol_type', 'service', 'flag', 'land',
-                         'logged_in', 'is_host_login', 'is_guest_login',
-                         'target']
     encode_label(datasets, index_to_category)
+
     indices = range(len(datasets))
     train_indices, dev_indices = train_test_split(indices, shuffle=True)
     print("loading total data {} train data {}, dev_data {}".format(
         len(datasets), len(train_indices), len(dev_indices)))
-    train_data = datasets.iloc[train_indices, :41]
-    train_labels = datasets.iloc[train_indices, 41]
-    dev_data = datasets.iloc[dev_indices, :41]
-    dev_labels = datasets.iloc[dev_indices, 41]
+
+    train_data = datasets.iloc[train_indices, :41].values
+    train_labels = datasets.iloc[train_indices, 41].values
+    dev_data = datasets.iloc[dev_indices, :41].values
+    dev_labels = datasets.iloc[dev_indices, 41].values
     return train_data, train_labels, dev_data, dev_labels
     
 def encode_label(data, index_to_category):
     for index in index_to_category:
         le = LabelEncoder().fit(data[index])
         data[index] = le.transform(data[index])
+        data[index] = pd.get_dummies(data[index])
+
+
+
