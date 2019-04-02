@@ -2,12 +2,11 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 def load_data(filenames):
     datasets = []
-    for filename in filenames:
-        names = ['duration', 'protocol_type', 'service', 'flag', 'src_byte',
+    names = ['duration', 'protocol_type', 'service', 'flag', 'src_byte',
                   'dst_bytes', 'land', 'wrong_fragment', 'urgent', 'hot',
                   'num_failed_logins', 'logged_in', 'num_compromised',
                    'root_shell', 'su_attempted', 'num_root',
@@ -22,31 +21,41 @@ def load_data(filenames):
                   'dst_host_serror_rate', 'dst_host_srv_serror_rate',
                   'dst_host_rerror_rate', 'dst_host_srv_rerror_rate',
                   'class', 'dummy']
+    for filename in filenames:
         dataset = pd.read_csv(filename, sep=',', header=None, names=names)
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
+    # delete unnecessary data
+    datasets.pop('land')
+    datasets.pop('dummy')
     return datasets
 
-def process_data(datasets, index_to_category, index_to_continuous):
-    label_encoder = LabelEncoder()
-    encode_label(datasets, index_to_category)
+def convert_to_onehot(data):
+    enc = OneHotEncoder(categories='auto')
+    le = LabelEncoder()
+    categorical_dataset = data.apply(le.fit_transform)
+    enc.fit(categorical_dataset)
+    onehot_dataset = enc.transform(categorical_dataset).toarray()
+    return onehot_dataset
 
+def process_data(data, index_to_category, index_to_continuous):
+    continuous_dataset = data[index_to_continuous].values
+    categorical_dataset = data[index_to_category]
+    labels = categorical_dataset.pop('class')
+    categorical_dataset = convert_to_onehot(categorical_dataset)
+    np_datasets = np.concatenate(
+        (continuous_dataset, categorical_dataset), axis=1) 
+    return np_datasets, labels
+
+def devide_train_dev(datasets, labels):
     indices = range(len(datasets))
     train_indices, dev_indices = train_test_split(indices, shuffle=True)
     print("loading total data {} train data {}, dev_data {}".format(
         len(datasets), len(train_indices), len(dev_indices)))
-
-    train_data = datasets.iloc[train_indices, :41].values
-    train_labels = datasets.iloc[train_indices, 41].values
-    dev_data = datasets.iloc[dev_indices, :41].values
-    dev_labels = datasets.iloc[dev_indices, 41].values
+    train_data = datasets[train_indices]
+    train_labels = labels[train_indices].values
+    dev_data = datasets[dev_indices]
+    dev_labels = labels[dev_indices].values
     return train_data, train_labels, dev_data, dev_labels
-    
-def encode_label(data, index_to_category):
-    for index in index_to_category:
-        le = LabelEncoder().fit(data[index])
-        data[index] = le.transform(data[index])
-        data[index] = pd.get_dummies(data[index])
-
-
+ 
 
