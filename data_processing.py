@@ -57,5 +57,12 @@ def devide_train_dev(datasets, labels):
     dev_data = datasets[dev_indices]
     dev_labels = labels[dev_indices].values
     return train_data, train_labels, dev_data, dev_labels
- 
 
+def generator(datasets):
+    for row in datasets:
+        yield row
+ 
+def get_train_dataset(datasets, batch_size):
+    tf_dataset = tf.data.Dataset.from_generator(
+        lambda: generator(datasets), tf.float32)
+    return tf_dataset.batch(batch_size).repeat()

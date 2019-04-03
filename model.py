@@ -31,4 +31,8 @@ class AutoEncoder(object):
             inputs=layer_1,
             units=reconstructed_size,
             name="decode2")
+        with tf.variable_scope('decode1', reuse=True):
+            self.w_decoder_1 = tf.get_variable('kernel')
+        with tf.variable_scope('decode2', reuse=True):
+            self.w_decoder_2 = tf.get_variable('kernel')
         return X_dense_reconstructed
