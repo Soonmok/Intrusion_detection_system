@@ -2,17 +2,18 @@ import tensorflow as tf
 from model import *
 from data_processing import *
 import argparse
-
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 if __name__=="__main__":
 
     # setting parameters
     args = argparse.ArgumentParser()
-    args.add_argument('--batch_size', type=int, default=256)
+    args.add_argument('--batch_size', type=int, default=128)
     args.add_argument('--hidden_size', type=int, default=32)
     args.add_argument(
         '--data_path', type=str, default='./dataset/train_data/KDDTrain+.txt')
     args.add_argument('--learning_rate', type=float, default=0.001)
-    args.add_argument('--epoch', type=int, default=20)
+    args.add_argument('--epoch', type=int, default=20000)
     config = args.parse_args()
 
     datasets = load_data([config.data_path])
@@ -28,20 +29,12 @@ if __name__=="__main__":
     input_x = tf.placeholder(
         tf.float32, shape=(config.batch_size, num_features))
 
-    #input_y = tf.placeholder(
-    #    tf.float32, shape=(config.batch_size, ))
     global_step = tf.Variable(0, name="global_step")
-
     ae_model = AutoEncoder(input_x, config.hidden_size)
-
     reconstruction_cost = tf.losses.mean_squared_error(
-        input_x, ae_model.X_dense_reconstructed)
-    regulation_cost = tf.reduce_sum(ae_model.w_encoder_1 ** 2) + \
-            tf.reduce_sum(ae_model.w_encoder_2 ** 2) + \
-            tf.reduce_sum(ae_model.w_decoder_1 ** 2) + \
-            tf.reduce_sum(ae_model.w_decoder_2 ** 2)
+        ae_model.normalized, ae_model.X_reconstructed)
 
-    total_loss = reconstruction_cost + regulation_cost * 0.5
+    total_loss = reconstruction_cost 
 
     train_op = tf.train.AdamOptimizer(
         config.learning_rate).minimize(total_loss, global_step=global_step)
@@ -57,7 +50,8 @@ if __name__=="__main__":
     def train_step(batch_data):
         train_batch_data = sess.run(batch_data)
         feed_dict = {input_x: train_batch_data}
-        _, cost, step = sess.run([train_op, total_loss, global_step], feed_dict)
+        _, cost, step= sess.run(
+            [train_op, total_loss, global_step], feed_dict)
         return cost, step
 
     epoch = 1
@@ -65,7 +59,7 @@ if __name__=="__main__":
         try:
             cost, step = train_step(train_batch)
             if step % 100 == 0:
-                print("step {}, const {}".format(step, cost))
+                print("step {}, cost {} ".format(step, cost))
         except ValueError: 
             print("==============================")
             epoch += 1
@@ -73,3 +67,4 @@ if __name__=="__main__":
                 pass
             else:
                 break
+
