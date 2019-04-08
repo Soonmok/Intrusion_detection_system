@@ -1,9 +1,10 @@
 import tensorflow as tf
 
 class AutoEncoder(object):
-    def __init__(self, X_dense, hidden_size):
+    def __init__(self, X_dense, hidden_size, num_classes):
         encoded_features = self.encode(X_dense, hidden_size)
         self.X_reconstructed = self.decode(encoded_features, X_dense.shape[1])
+        self.logits = self.classify(encoded_features, num_classes)
 
     def encode(self, x_input, hidden_size):
         self.normalized = tf.nn.sigmoid(x_input)
@@ -28,3 +29,12 @@ class AutoEncoder(object):
         with tf.variable_scope('decode', reuse=True):
             self.w_decoder = tf.get_variable('kernel')
         return X_reconstructed
+
+    def classify(self, encoded_features, num_classes):
+        logits = tf.layers.dense(
+            inputs=encoded_features,
+            units=num_classes,
+            activation=tf.nn.sigmoid,
+            name="logits")
+        return logits
+

@@ -41,11 +41,12 @@ def convert_to_onehot(data):
 def process_data(data, index_to_category, index_to_continuous):
     continuous_dataset = data[index_to_continuous].values
     categorical_dataset = data[index_to_category]
-    labels = categorical_dataset.pop('class')
+    labels = pd.DataFrame({'labels':categorical_dataset.pop('class')})
     categorical_dataset = convert_to_onehot(categorical_dataset)
+    categorical_labels = convert_to_onehot(labels)
     np_datasets = np.concatenate(
         (continuous_dataset, categorical_dataset), axis=1) 
-    return np_datasets, labels
+    return np_datasets, categorical_labels
 
 def devide_train_dev(datasets, labels):
     indices = range(len(datasets))
@@ -53,16 +54,17 @@ def devide_train_dev(datasets, labels):
     print("loading total data {} train data {}, dev_data {}".format(
         len(datasets), len(train_indices), len(dev_indices)))
     train_data = datasets[train_indices]
-    train_labels = labels[train_indices].values
+    train_labels = labels[train_indices]
     dev_data = datasets[dev_indices]
-    dev_labels = labels[dev_indices].values
+    dev_labels = labels[dev_indices]
     return train_data, train_labels, dev_data, dev_labels
 
 def generator(datasets):
-    for row in datasets:
-        yield row
+    for data, label in datasets:
+        yield data, label
  
-def get_train_dataset(datasets, batch_size):
+def get_train_dataset(data, labels, batch_size):
+    datasets = list(zip(data, labels))
     tf_dataset = tf.data.Dataset.from_generator(
-        lambda: generator(datasets), tf.float32)
+        lambda: generator(datasets), (tf.float32, tf.int64))
     return tf_dataset.batch(batch_size).repeat()
