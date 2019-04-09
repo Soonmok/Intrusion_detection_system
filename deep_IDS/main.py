@@ -13,9 +13,9 @@ if __name__=="__main__":
     args.add_argument(
         '--data_path', type=str, default='./dataset/train_data/KDDTrain+.txt')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
-    args.add_argument('--STL_epoch', type=int, default=1000)
+    args.add_argument('--STL_epoch', type=int, default=1)
     args.add_argument('--classify_learning_rate', type=float, default=0.0001)
-    args.add_argument('--classify_epoch', type=int, default=1000)
+    args.add_argument('--classify_epoch', type=int, default=10)
     config = args.parse_args()
 
     datasets = load_data([config.data_path])
@@ -26,7 +26,7 @@ if __name__=="__main__":
     train_data, train_labels, dev_data, dev_labels = devide_train_dev(
         data, labels)
     num_features = train_data.shape[1]
-    num_classes = 2
+    num_classes = train_labels.shape[1]
     
     """------------model part------------"""
     input_x = tf.placeholder(
@@ -87,13 +87,14 @@ if __name__=="__main__":
         feed_dict = {input_x: train_batch_data,
                      input_y: train_batch_label}
         _, cost, logits, step = sess.run(
-            [softmax_classifier_op, classification_cost, ae_model.logits, classify_global_step])
+            [softmax_classifier_op, classification_cost, ae_model.logits,
+             classify_global_step], feed_dict)
         return cost, logits, step
 
     epoch = 1
     while True:
         try:
-            cost, logits, step = train_classify_step()
+            cost, logits, step = train_classify_step(train_batch)
             if step % 100 == 0:
                 print("classification step {}, classification cost {}".format(step, cost))
         except ValueError:
