@@ -90,13 +90,19 @@ if __name__=="__main__":
             [softmax_classifier_op, classification_cost, ae_model.logits,
              classify_global_step], feed_dict)
         return cost, logits, step
-
+    
+    saver = tf.train.Saver()
     epoch = 1
     while True:
         try:
             cost, logits, step = train_classify_step(train_batch)
             if step % 100 == 0:
                 print("classification step {}, classification cost {}".format(step, cost))
+            if step % 1000 == 0:
+                print("saving model ...")
+                path = saver.save(sess, "./models/checkpoint"),
+                                  global_step=classify_global_step)
+                print("saved model checkpoint to {}\n".format(path))
         except ValueError:
             print("==============================")
             epoch += 1
