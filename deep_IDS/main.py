@@ -13,7 +13,9 @@ if __name__=="__main__":
     args.add_argument(
         '--data_path', type=str, default='./dataset/train_data/KDDTrain+.txt')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
-    args.add_argument('--STL_epoch', type=int, default=1)
+    args.add_argument('--STL_epoch', type=int, default=50)
+    args.add_argument('--STL_patient_cnt', type=int, default=200)
+    args.add_argument('--min_delta', type=float, default=0.000001)
     args.add_argument('--classify_learning_rate', type=float, default=0.0001)
     args.add_argument('--classify_epoch', type=int, default=10)
     config = args.parse_args()
@@ -49,6 +51,9 @@ if __name__=="__main__":
     classify_global_step = tf.Variable(0, name="classify_global_step")
     classification_cost = tf.losses.softmax_cross_entropy(
         input_y, ae_model.logits)
+    prediction = tf.argmax(ae_model.logits, 1, name="prediction")
+    classification_accuracy = tf.reduce_mean(
+        tf.cast(tf.equal(prediction, tf.argmax(input_y, 1)), "float"), name="accuracy")
     softmax_classifier_op = tf.train.GradientDescentOptimizer(
         config.classify_learning_rate).minimize(
             classification_cost, global_step=classify_global_step)
@@ -71,36 +76,52 @@ if __name__=="__main__":
         return cost, step
 
     epoch = 1
+    patience_cnt = 0
+    cur_cost = 0
     while True:
         try:
-            cost, step = train_step(train_batch)
+            prev_cost = cur_cost
+            cur_cost, step = train_step(train_batch)
+
             if step % 100 == 0:
-                print("step {}, cost {} ".format(step, cost))
+                print("step {}, cost {} ".format(step, cur_cost))
+
+            if prev_cost - cur_cost > config.min_delta:
+                patience_cnt = 0
+            else:
+                patience_cnt += 1
+
+            if patience_cnt > config.STL_patient_cnt:
+                print("early stopping")
+                break
+                
         except ValueError: 
             print("==============================")
             epoch += 1
             if epoch > config.STL_epoch:
                 break
 
+    # Classification part
     def train_classify_step(batch_data):
         train_batch_data, train_batch_label = sess.run(batch_data)
         feed_dict = {input_x: train_batch_data,
                      input_y: train_batch_label}
-        _, cost, logits, step = sess.run(
-            [softmax_classifier_op, classification_cost, ae_model.logits,
-             classify_global_step], feed_dict)
-        return cost, logits, step
+        _, cost, acc, step = sess.run(
+            [softmax_classifier_op, classification_cost,
+             classification_accuracy, classify_global_step], feed_dict)
+        return cost, acc, step
     
     saver = tf.train.Saver()
     epoch = 1
     while True:
         try:
-            cost, logits, step = train_classify_step(train_batch)
+            cost, acc, step = train_classify_step(train_batch)
             if step % 100 == 0:
-                print("classification step {}, classification cost {}".format(step, cost))
+                print("classification step {}, classification cost {}"
+                      "  acc {}".format(step, cost, acc))
             if step % 1000 == 0:
                 print("saving model ...")
-                path = saver.save(sess, "./models/checkpoint"),
+                path = saver.save(sess, "./models/checkpoint",
                                   global_step=classify_global_step)
                 print("saved model checkpoint to {}\n".format(path))
         except ValueError:
