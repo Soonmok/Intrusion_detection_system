@@ -5,6 +5,23 @@ implement IDS using deep learning
 
 ## Implement A Deep Learning Approach for Network Intrusion Detection System paper
 
+## Dataset
+Download the zipfile from this url
+https://www.unb.ca/cic/datasets/nsl.html
+
+unzip the file into `Intrusion_detection_system/deep_IDS/dataset/train_data`
+
+edit the file `KDDTrain+_20Percent.arff`   (remove @attributes lines (33 lines))
+
+rename `KDDTrain+_20Percent.arf` into `KDDTrain_binary.txt`
+
+`mv KDDTrain+_20Percent.arff KDDTrain_binary.txt`
+
+## How to run
+`
+pip install -r requirements.txt
+python main.py
+`
 ## references 
 A Deep Learning Approach for Network Intrusion Detection
 System
