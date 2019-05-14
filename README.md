@@ -6,10 +6,15 @@ implement IDS using deep learning
 ## Implement A Deep Learning Approach for Network Intrusion Detection System paper
 
 ## Requirements
+
 numpy
+
 sklearn
+
 pandas
+
 tensorflow-1.13.1
+
 
 ## Dataset
 Download the zipfile from this url
