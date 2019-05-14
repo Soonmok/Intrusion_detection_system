@@ -1,0 +1,4 @@
+sklearn
+pandas
+numpy
+tensorflow-1.13.1-py3
