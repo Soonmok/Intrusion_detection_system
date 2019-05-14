@@ -1,6 +1,7 @@
 import tensorflow as tf
 from model import *
 from data_processing import *
+from train_utils import *
 import argparse
 import sys
 np.set_printoptions(threshold=sys.maxsize)
@@ -11,13 +12,14 @@ if __name__=="__main__":
     args.add_argument('--batch_size', type=int, default=128)
     args.add_argument('--hidden_size', type=int, default=32)
     args.add_argument(
-        '--data_path', type=str, default='./dataset/train_data/KDDTrain+.txt')
+        '--data_path', type=str, default='./dataset/train_data/KDDTrain_binary.txt')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
-    args.add_argument('--STL_epoch', type=int, default=50)
+    args.add_argument('--STL_epoch', type=int, default=100)
     args.add_argument('--STL_patient_cnt', type=int, default=200)
+    args.add_argument('--STL_dropout_rate', type=float, default=0.5)
     args.add_argument('--min_delta', type=float, default=0.000001)
     args.add_argument('--classify_learning_rate', type=float, default=0.0001)
-    args.add_argument('--classify_epoch', type=int, default=10)
+    args.add_argument('--classify_epoch', type=int, default=200)
     config = args.parse_args()
 
     datasets = load_data([config.data_path])
@@ -38,9 +40,9 @@ if __name__=="__main__":
     STL_global_step = tf.Variable(0, name="global_step")
 
     # STL part
-    ae_model = AutoEncoder(input_x, config.hidden_size, num_classes)
+    ae_model = AutoEncoder(input_x, config.hidden_size, num_classes, config)
     reconstruction_cost = tf.losses.mean_squared_error(
-        ae_model.normalized, ae_model.X_reconstructed)
+       input_x, ae_model.X_reconstructed)
 
     total_loss = reconstruction_cost 
 
@@ -70,9 +72,10 @@ if __name__=="__main__":
     # STL training part
     def train_step(batch_data):
         train_batch_data, _ = sess.run(batch_data)
-        feed_dict = {input_x: train_batch_data}
-        _, cost, step= sess.run(
-            [train_op, total_loss, STL_global_step], feed_dict)
+        train_batch_data_norm = tf.keras.utils.normalize(train_batch_data)
+        feed_dict = {input_x: train_batch_data_norm}
+        x_data, _, cost, step= sess.run(
+            [input_x, train_op, total_loss, STL_global_step], feed_dict)
         return cost, step
 
     epoch = 1

@@ -1,16 +1,15 @@
 import tensorflow as tf
 
 class AutoEncoder(object):
-    def __init__(self, X_dense, hidden_size, num_classes):
-        encoded_features = self.encode(X_dense, hidden_size)
+    def __init__(self, X_dense, hidden_size, num_classes, config):
+        encoded_features = self.encode(X_dense, hidden_size, config)
         self.X_reconstructed = self.decode(encoded_features, X_dense.shape[1])
         self.logits = self.classify(encoded_features, num_classes)
 
-    def encode(self, x_input, hidden_size):
-        self.normalized = tf.nn.sigmoid(x_input)
+    def encode(self, x_input, hidden_size, config):
         dropout_layer = tf.layers.dropout(
-            self.normalized,
-            rate=0.5)
+            x_input,
+            rate=config.STL_dropout_rate)
         features = tf.layers.dense(
             inputs=dropout_layer,
             units=hidden_size,
