@@ -32,6 +32,7 @@ rename `KDDTrain+_20Percent.arf` into `KDDTrain_binary.txt`
 `
 python main.py
 `
+
 if you want to specify the path of dataset 
 
 ` python main.py --data_path="the/path/to/dataset`
