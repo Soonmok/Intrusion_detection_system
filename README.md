@@ -5,6 +5,12 @@ implement IDS using deep learning
 
 ## Implement A Deep Learning Approach for Network Intrusion Detection System paper
 
+## Requirements
+numpy
+sklearn
+pandas
+tensorflow-1.13.1
+
 ## Dataset
 Download the zipfile from this url
 https://www.unb.ca/cic/datasets/nsl.html
@@ -19,9 +25,11 @@ rename `KDDTrain+_20Percent.arf` into `KDDTrain_binary.txt`
 
 ## How to run
 `
-pip install -r requirements.txt
 python main.py
 `
+if you want to specify the path of dataset 
+
+` python main.py --data_path="the/path/to/dataset`
 ## references 
 A Deep Learning Approach for Network Intrusion Detection
 System
