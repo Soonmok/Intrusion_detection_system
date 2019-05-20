@@ -36,6 +36,15 @@ python main.py
 if you want to specify the path of dataset 
 
 ` python main.py --data_path="the/path/to/dataset`
+
+## How to run with docker
+```
+docker run -it --runtime=nvidia -v $PWD:/app tensorflow/tensorflow:1.13.1-py3
+
+cd /app
+
+python main.py
+```
 ## references 
 A Deep Learning Approach for Network Intrusion Detection
 System
