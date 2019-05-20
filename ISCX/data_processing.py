@@ -6,25 +6,6 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 def load_data(filenames):
     datasets = []
-#     names = ['FlowID', 'Src_IP', 'Src_Port', 'Dst_IP', 'Dst_Port', 'Protocol',
-#             'Timestamp', 'Flow_Duration', 'Tot_fwd_pkts', 'Tot_bwd_pkts',
-#             'TotLen_fwd_pkts', 'Totlen_bwd_pkts', 'Fwd_Pkt_len_Max',
-#              'Fwd_Pkt_len_Min', 'Fwd_Pkt_len_mean', 'Fwd_Pkt_len_std'.
-#             'Bwd_Pkt_len_Max', 'Bwd_Pkt_len_Min', 'Bwd_Pkt_len_Mean', 
-#             'Bwd_Pkt_len_Std', 'Flow_Bytes/s', 'Flow_Pkts/s', 'Flow_IAT_Mean',
-#             'Flow_IAT_Std', 'Flow_IAT_Max', 'Flow_IAT_Min', 'Fwd_IAT_Tot',
-#             'Fwd_IAT_Mean', 'Fwd_IAT_Std', 'Fwd_IAT_Max', 'Fwd_IAT_Min',
-#             'Bwd_IAT_Tot', 'Bwd_IAT_Mean', 'Bwd_IAT_Std', 'Bwd_IAT_Max',
-#             'Bwd_IAT_Min', 'Fwd_PSH_Flags', 'Bwd_PSH_Flags', 'Fwd_URG_Flags',
-#             'Bwd_URG_Flags', 'Fwd_Header_Len', 'Bwd_Header_Len', 'Fwd_Pkts/s',
-#             'Bwd_Pkts/s', 'Ptk_Len_Min', 'Pkt_Len_Max', 'Pkt_Len_Mean',
-#              'Pkt_Len_Std', 'Pkt_Len_Var', 'Fin_Flag_Cnt', 'Syn_Flag_Cnt', 
-#             'Rst_Flag_Cnt', 'PSH_Flag_Cnt', 'Ack_Flag_Cnt', 'Ugr_Flag_Cnt',
-#             'Cwe_Flag_Cnt', 'Ece_Flag_Cnt', 'Down/Up_Ratio', 'Pkt_Size_Avg',
-#             'Fwd_Seg_Size_Avg', 'Bwd_Seg_Size_Avg', 'Fwd_Byts/b_Avg',
-#             'Fwd_Pkts/b_Avg', 'Fwd_Blk_Rate_Avg', 'Bwd_Bytes/b_Avg',
-#              'Bwd_Pkts/b_Avg', 'Bwd_Blk_Rate_Avg', 'Subflow_Fwd_Pkts',
-#             'Subflow_Fwd_Byts', 'Subflow_Bwd_Pkts', 'Subflow_Bwd_']
     names = [ 'Flow ID','Src IP','Src Port','Dst IP','Dst Port','Protocol',
              'Timestamp','Flow Duration','Tot Fwd Pkts','Tot Bwd Pkts',
              'TotLen Fwd Pkts','TotLen Bwd Pkts','Fwd Pkt Len Max',
@@ -47,26 +28,15 @@ def load_data(filenames):
              'Active Mean','Active Std','Active Max','Active Min,Idle Mean',
              'Idle Std,Idle Max','Idle Min','Label']
     for filename in filenames:
-        dataset = pd.read_csv(filename, sep=',', header=None, names=names)
+        dataset = pd.read_csv(filename, sep=',')
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
-    # delete unnecessary data
-    datasets.pop('land')
-    datasets.pop('dummy')
     return datasets
 
-def convert_to_onehot(data):
-    enc = OneHotEncoder(categories='auto')
-    le = LabelEncoder()
-    categorical_dataset = data.apply(le.fit_transform)
-    enc.fit(categorical_dataset)
-    onehot_dataset = enc.transform(categorical_dataset).toarray()
-    return onehot_dataset
-
 def process_data(data):
-    np_datasets = data[index_to_continuous].values
-    labels = pd.DataFrame({'labels':categorical_dataset.pop('Label')})
-    return np_datasets, labels 
+    np_datasets = data.values[:, :-1]
+    np_labels = data.values[:, -1]
+    return np_datasets, np_labels 
 
 def devide_train_dev(datasets, labels):
     indices = range(len(datasets))
