@@ -10,6 +10,7 @@ def load_data(filenames):
         dataset = pd.read_csv(filename, sep=',')
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
+    datasets = datasets.reindex(np.random.permutation(datasets.index))
     return datasets
 
 def convert_to_onehot(data):

@@ -25,6 +25,7 @@ def load_data(filenames):
         dataset = pd.read_csv(filename, sep=',', header=None, names=names)
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
+    datasets.reindex(np.random.permutation(datasets.index))
     # delete unnecessary data
     datasets.pop('land')
     datasets.pop('dummy')

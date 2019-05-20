@@ -27,7 +27,7 @@ if __name__=="__main__":
     index_to_continuous = list(set(datasets.columns.values)-set(index_to_category))
     unnecessary_cols = ['Flow ID', 'Src IP', 'Src Port', 'Dst IP', 'Timestamp',
                        'Label']
-    data, labels=  process_data(datasets, unnecessary_cols)
+    data, labels = process_data(datasets, unnecessary_cols)
     train_data, train_labels, dev_data, dev_labels = devide_train_dev(
         data, labels)
     num_features = train_data.shape[1]
