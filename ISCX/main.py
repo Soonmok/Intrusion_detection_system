@@ -31,7 +31,7 @@ if __name__=="__main__":
     train_data, train_labels, dev_data, dev_labels = devide_train_dev(
         data, labels)
     num_features = train_data.shape[1]
-    num_classes = train_labels.shape[0]
+    num_classes = train_labels.shape[1]
     print("train / dev  --> {} / {}".format(len(train_data), len(dev_data)))
     print("total features -> {}".format(num_features))
     

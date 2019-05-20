@@ -12,10 +12,18 @@ def load_data(filenames):
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
     return datasets
 
+def convert_to_onehot(data):
+    enc = OneHotEncoder(categories='auto')
+    le = LabelEncoder()
+    categorical_dataset = data.apply(le.fit_transform)
+    enc.fit(categorical_dataset)
+    onehot_dataset = enc.transform(categorical_dataset).toarray()
+    return onehot_dataset
+
 def process_data(data, unnecessary_cols):
     columns = [x for x in list(data.columns) if x not in unnecessary_cols]
     np_datasets = data[columns].values
-    np_labels = data['Label'].values
+    np_labels = convert_to_onehot(pd.DataFrame({'Label':data['Label']}))
     return np_datasets, np_labels 
 
 def devide_train_dev(datasets, labels):

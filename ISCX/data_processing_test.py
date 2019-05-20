@@ -14,7 +14,7 @@ def test_process_data():
     train_data, train_labels, dev_data, dev_labels = devide_train_dev(
         data, labels)
     assert data.shape == (20, 78)
-    assert labels.shape == (20, )
+    assert labels.shape == (20, 1)
     assert len(train_data) == 15
     assert len(train_labels) == 15
     assert len(dev_data) == 5
