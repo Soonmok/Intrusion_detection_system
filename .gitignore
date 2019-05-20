@@ -1,4 +1,7 @@
 dataset
 __pycache__
 *.swp
-deep_IDS/models/*
+KDD_NSL/models/*
+*.csv
+*.pcap
+*.pyc
