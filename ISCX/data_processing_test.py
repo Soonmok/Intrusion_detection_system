@@ -1,15 +1,16 @@
 from data_processing import *
 
 def test_load_data():
-    filenames = ['./mock_data1.csv', './mock_data2.csv']
-    mock_data = load_data(filenames)
+    mock_data = load_data('./test_dataset')
     assert len(mock_data) == 20
 
+def test_infinity():
+    mock_data = load_data('./test_dataset')
+
 def test_process_data():
-    filenames = ['./mock_data1.csv', './mock_data2.csv']
     unnecessary_cols = ['Flow ID', 'Src IP', 'Src Port', 'Dst IP', 'Timestamp',
                        'Label']
-    mock_data = load_data(filenames)
+    mock_data = load_data('./test_dataset')
     data, labels = process_data(mock_data, unnecessary_cols)
     train_data, train_labels, dev_data, dev_labels = devide_train_dev(
         data, labels)
@@ -23,4 +24,5 @@ def test_process_data():
 if __name__=="__main__":
     test_load_data()
     test_process_data()
+    test_infinity()
     print("test is all passed")

@@ -2,6 +2,7 @@ dataset
 __pycache__
 *.swp
 KDD_NSL/models/*
+ISCX/models/*
 *.csv
 *.pcap
 *.pyc

@@ -1,17 +1,27 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+import os 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-def load_data(filenames):
+def load_data(dirname):
     datasets = []
+    filenames = os.listdir(dirname)
     for filename in filenames:
-        dataset = pd.read_csv(filename, sep=',')
+        full_filename = os.path.join(dirname, filename)
+        dataset = pd.read_csv(full_filename, sep=',')
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
     datasets = datasets.reindex(np.random.permutation(datasets.index))
+    datasets = clean_data(datasets)
     return datasets
+
+def clean_data(dataset):
+    dataset['Flow Byts/s'] = pd.to_numeric(dataset['Flow Byts/s'], errors='coerce')
+    dataset['Flow Pkts/s'] = pd.to_numeric(dataset['Flow Pkts/s'], errors='coerce')
+    cleaned_dataset = dataset[~dataset.isin([np.nan, np.inf, -np.inf]).any(1)]
+    return cleaned_dataset
 
 def convert_to_onehot(data):
     enc = OneHotEncoder(categories='auto')
@@ -47,3 +57,4 @@ def get_train_dataset(data, labels, batch_size):
     tf_dataset = tf.data.Dataset.from_generator(
         lambda: generator(datasets), (tf.float32, tf.int64))
     return tf_dataset.batch(batch_size).repeat()
+

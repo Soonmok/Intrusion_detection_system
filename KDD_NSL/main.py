@@ -12,7 +12,7 @@ if __name__=="__main__":
     args.add_argument('--batch_size', type=int, default=128)
     args.add_argument('--hidden_size', type=int, default=32)
     args.add_argument(
-        '--data_path', type=str, default='./dataset/train_data/KDDTrain_binary.txt')
+        '--data_path', type=str, default='./dataset/train_data/KDDTrain+.arff')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
     args.add_argument('--STL_epoch', type=int, default=100)
     args.add_argument('--STL_patient_cnt', type=int, default=200)

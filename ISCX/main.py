@@ -9,10 +9,10 @@ if __name__=="__main__":
     # setting parameters
     args = argparse.ArgumentParser()
     args.add_argument('--batch_size', type=int, default=128)
-    args.add_argument('--hidden_size', type=int, default=32)
+    args.add_argument('--hidden_size', type=int, default=16)
     args.add_argument(
-        '--data_path', type=str,
-        default='./dataset/Thursday-WorkingHours.pcap_Flow.csv')
+        '--data_dir', type=str,
+        default='./dataset')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
     args.add_argument('--STL_epoch', type=int, default=100)
     args.add_argument('--STL_patient_cnt', type=int, default=200)
@@ -22,7 +22,7 @@ if __name__=="__main__":
     args.add_argument('--classify_epoch', type=int, default=200)
     config = args.parse_args()
 
-    datasets = load_data([config.data_path])
+    datasets = load_data(config.data_dir)
     index_to_category = ['protocol_type', 'service', 'flag', 'class']
     index_to_continuous = list(set(datasets.columns.values)-set(index_to_category))
     unnecessary_cols = ['Flow ID', 'Src IP', 'Src Port', 'Dst IP', 'Timestamp',
@@ -85,18 +85,16 @@ if __name__=="__main__":
     patience_cnt = 0
     cur_cost = 0
     while True:
+
         try:
             prev_cost = cur_cost
             cur_cost, step = train_step(train_batch)
-
             if step % 100 == 0:
                 print("step {}, cost {} ".format(step, cur_cost))
-
             if prev_cost - cur_cost > config.min_delta:
                 patience_cnt = 0
             else:
                 patience_cnt += 1
-
             if patience_cnt > config.STL_patient_cnt:
                 print("early stopping")
                 break
