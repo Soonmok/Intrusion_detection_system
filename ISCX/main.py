@@ -3,6 +3,8 @@ from model import *
 from data_processing import *
 import argparse
 import sys
+import pickle
+
 np.set_printoptions(threshold=sys.maxsize)
 if __name__=="__main__":
 
@@ -13,6 +15,9 @@ if __name__=="__main__":
     args.add_argument(
         '--data_dir', type=str,
         default='./dataset')
+    args.add_argument(
+        '--Total_pandas_path', type=str, 
+        default='./dataset/total_data.pkl')
     args.add_argument('--STL_learning_rate', type=float, default=0.0001)
     args.add_argument('--STL_epoch', type=int, default=100)
     args.add_argument('--STL_patient_cnt', type=int, default=200)
@@ -22,7 +27,11 @@ if __name__=="__main__":
     args.add_argument('--classify_epoch', type=int, default=200)
     config = args.parse_args()
 
-    datasets = load_data(config.data_dir)
+    if config.Total_pandas_path.exists():
+       datasets = pickle.load(config.Total_pandas_path) 
+    else:
+        datasets = load_data(config.data_dir)
+        datasets.to_pickle(config.Total_pandas_path)
     index_to_category = ['protocol_type', 'service', 'flag', 'class']
     index_to_continuous = list(set(datasets.columns.values)-set(index_to_category))
     unnecessary_cols = ['Flow ID', 'Src IP', 'Src Port', 'Dst IP', 'Timestamp',
