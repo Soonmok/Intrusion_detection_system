@@ -10,16 +10,20 @@ def load_data(dirname):
     filenames = os.listdir(dirname)
     for filename in filenames:
         full_filename = os.path.join(dirname, filename)
+        print(full_filename)
         dataset = pd.read_csv(full_filename, sep=',')
+        print("done")
+        dataset = clean_data(dataset)
         datasets.append(dataset)
     datasets = pd.concat(datasets, axis=0, ignore_index=True)
     datasets = datasets.reindex(np.random.permutation(datasets.index))
-    datasets = clean_data(datasets)
     return datasets
 
 def clean_data(dataset):
-    dataset['Flow Byts/s'] = pd.to_numeric(dataset['Flow Byts/s'], errors='coerce')
-    dataset['Flow Pkts/s'] = pd.to_numeric(dataset['Flow Pkts/s'], errors='coerce')
+    dataset['Flow Byts/s'] = dataset['Flow Byts/s'].apply(
+                                pd.to_numeric, errors='coerce')
+    dataset['Flow Pkts/s'] = dataset['Flow Pkts/s'].apply(
+                                pd.to_numeric, errors='coerce')
     cleaned_dataset = dataset[~dataset.isin([np.nan, np.inf, -np.inf]).any(1)]
     return cleaned_dataset
 
